@@ -6,8 +6,9 @@
   <url>http://</url>
   <logo>http://</logo>
   <depend package="opencv" />
-  <depend package="driver/orogen/camera_prosilica" />
-  <depend package="driver/video_streamer_vlc" />
+  <depend package="drivers/orogen/camera_prosilica" />
+  <depend package="drivers/video_streamer_vlc" />
+  <depend package="image_processing/frame_helper" />
   <versioncontrol type="git" url="" />
   <export>
     <cpp cflags="" lflags="" />
