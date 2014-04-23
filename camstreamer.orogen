@@ -1,0 +1,50 @@
+name 'camstreamer'
+version '0.1'
+# Find documentation at http://doudou.github.com/orogen/
+
+using_library 'frame_helper'
+using_library 'video_streamer_vlc'
+using_task_library 'camera_prosilica'
+import_types_from 'base'
+
+task_context 'Task' do
+	needs_configuration
+
+        input_port("camera_image", ro_ptr('base::samples::frame::Frame')).
+            doc 'camera frame'
+
+        property("camera_image_width",   "int").
+            doc "the camera image width"
+      
+        property("camera_image_height",   "int").
+            doc "the camera image height"
+	
+        property("fps",   "int", 30).
+            doc "frames per second for the camera"
+	
+        property("sout",   "string", "#transcode{vcodec=MJPG, vb=500}:std{access=http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=10.250.7.56:8080/vid.mjpg}").
+            doc "vlc sout string"
+	
+    fatal_states :IO_ERROR
+    port_driven :camera_image
+end
+
+
+deployment "camstreamer" do
+    #do_not_install
+    camstreamer_task = task("camstreamer", "Task")
+    #  periodic(0.0005)
+    
+
+    add_default_logger
+    if !corba_enabled?
+        browse camstreamer_task
+    end
+end
+
+deployment "camstreamer_deployment" do
+    camstreamer_task = task("camstreamer", "camstreamer::Task")
+    camera_task = task("camera", "camera_prosilica::Task")
+    add_default_logger
+end
+

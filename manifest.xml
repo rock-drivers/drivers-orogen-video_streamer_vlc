@@ -1,0 +1,15 @@
+<package>
+  <description brief="module which streams camera images as vlc stream">
+  </description>
+  <author>Marc Hildebrandt/marc.hildebrandt@dfki.de</author>
+  <license></license>
+  <url>http://</url>
+  <logo>http://</logo>
+  <depend package="opencv" />
+  <depend package="driver/orogen/camera_prosilica" />
+  <depend package="driver/video_streamer_vlc" />
+  <versioncontrol type="git" url="" />
+  <export>
+    <cpp cflags="" lflags="" />
+  </export>
+</package>
