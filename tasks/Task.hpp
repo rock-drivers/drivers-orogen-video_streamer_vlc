@@ -30,6 +30,7 @@ namespace camstreamer {
 	friend class TaskBase;
     protected:
         RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
+        base::samples::frame::Frame debayered_image;
         VlcStream *streamer;
 
 

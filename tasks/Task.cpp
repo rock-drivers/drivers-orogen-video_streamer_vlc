@@ -65,7 +65,9 @@ void Task::updateHook()
       case base::samples::frame::MODE_BAYER_BGGR:
       case base::samples::frame::MODE_BAYER_GBRG:
       {
-        std::runtime_error("CamerastreamTask: frame mode is not supported");
+        frame_helper::FrameHelper::convertBayerToRGB24(*current_image_, debayered_image);
+        mat = frame_helper::FrameHelper::convertToCvMat(debayered_image);
+//        std::runtime_error("CamerastreamTask: frame mode is not supported");
         break;
       }
       default:
