@@ -11,17 +11,25 @@ task_context 'Task' do
     input_port("frame", ro_ptr('base::samples::frame::Frame')).
         doc 'camera frame'
 
-    property("camera_image_width",   "int", 640).
+    property("frame_width",   "int", 640).
         doc "the camera image width"
 
-    property("camera_image_height",   "int", 480).
+    property("frame_height",   "int", 480).
         doc "the camera image height"
 
     property("fps",   "int", 30).
         doc "frames per second for the camera"
 
-    property("sout",   "string", "#transcode{vcodec=MJPG, vb=500}:std{access=http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=10.250.7.56:8080/vid.mjpg}").
-        doc "vlc sout string"
+    # String to pass in raw to VLC, if not given the string is generated from the default parameters above, that are inserted into this default:
+    # #transcode{vcodec=MJPG, vb=500}:std{access=http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=mpjpeg,dst=127.0.0.1:8080/video.mjpg}" 
+    property("vlc_raw_config","string","").
+        doc("string to pass in raw to vlc for transcodign, if given all other configs are ignored, see VLC documentation for details")
+
+    
+    property("vcodec","string","MJPG")
+    property("bitrate","int",500)
+    property("mux","string","mpjpeg")
+    property("dst","string","127.0.0.1:8080/video.mjpg")
 	
     fatal_states :IO_ERROR
     port_driven :frame

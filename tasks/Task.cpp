@@ -29,7 +29,13 @@ bool Task::configureHook()
     if (! TaskBase::configureHook())
         return false;
     
-    streamer = new VlcStream(_sout, _fps, _camera_image_width, _camera_image_height);
+    if(_vlc_raw_config.get().empty()){
+        std::stringstream s;
+        s << "#transcode{vcodec=" << _vcodec.get() << ", vb="<< _bitrate.get() << "}:std{access=http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=" << _mux.get() << ",dst=" << _dst.get() << "}";
+        _vlc_raw_config.set(s.str());
+    }
+    
+    streamer = new VlcStream(_vlc_raw_config, _fps, _frame_width, _frame_height);
     return streamer;
 }
 bool Task::startHook()
@@ -49,6 +55,10 @@ void Task::updateHook()
 
     if(image_read != RTT::NoData && new_image && current_image_->getStatus() == base::samples::frame::STATUS_VALID)
     {
+        if(current_image_->getWidth() != _frame_width || current_image_->getHeight() != _frame_height){
+            std::cout << "Warn incoming image has different size than configured" << std::endl ;
+            std::cout << "Current Size is: " << current_image_->getWidth() << "x" << current_image_->getHeight() << std::endl;
+        }
         switch(current_image_->getFrameMode())
         {
             case base::samples::frame::MODE_RGB:
