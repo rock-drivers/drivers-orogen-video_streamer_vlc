@@ -1,15 +1,15 @@
 /* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef CAMSTREAMER_TASK_TASK_HPP
-#define CAMSTREAMER_TASK_TASK_HPP
+#ifndef VIDEO_STREAMER_VLC_TASK_TASK_HPP
+#define VIDEO_STREAMER_VLC_TASK_TASK_HPP
 
-#include "camstreamer/TaskBase.hpp"
+#include "video_streamer_vlc/TaskBase.hpp"
 #include "opencv2/opencv.hpp"
 #include "frame_helper/FrameHelper.h"
 #include "video_streamer_vlc/VlcStream.hpp"
 
 
-namespace camstreamer {
+namespace video_streamer_vlc {
 
     /*! \class Task 
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
@@ -20,7 +20,7 @@ namespace camstreamer {
      * The name of a TaskContext is primarily defined via:
      \verbatim
      deployment 'deployment_name'
-         task('custom_task_name','camstreamer::Task')
+         task('custom_task_name','video_streamer_vlc::Task')
      end
      \endverbatim
      *  It can be dynamically adapted when the deployment is called with a prefix argument. 
@@ -39,7 +39,7 @@ namespace camstreamer {
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
          * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Task(std::string const& name = "camstreamer::Task");
+        Task(std::string const& name = "video_streamer_vlc::Task");
 
         /** TaskContext constructor for Task 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 

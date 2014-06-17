@@ -2,7 +2,7 @@
 
 #include "Task.hpp"
 
-using namespace camstreamer;
+using namespace video_streamer_vlc;
 
 Task::Task(std::string const& name)
     : TaskBase(name)
@@ -28,63 +28,59 @@ bool Task::configureHook()
 {
     if (! TaskBase::configureHook())
         return false;
-    return true;
+    
+    streamer = new VlcStream(_sout, _fps, _camera_image_width, _camera_image_height);
+    return streamer;
 }
 bool Task::startHook()
 {
     if (! TaskBase::startHook())
         return false;
-
-    streamer = new VlcStream(_sout, _fps, _camera_image_width, _camera_image_height);
-
     streamer->start();
-
-
     return true;
 }
 void Task::updateHook()
 {
     TaskBase::updateHook();
 
-  int image_read = _camera_image.read(current_image_);
-  bool new_image = image_read == RTT::NewData;
-  cv::Mat mat;
+    int image_read = _frame.read(current_image_);
+    bool new_image = image_read == RTT::NewData;
+    cv::Mat mat;
 
-  if(image_read != RTT::NoData && new_image && current_image_->getStatus() == base::samples::frame::STATUS_VALID)
-  {
-    switch(current_image_->getFrameMode())
+    if(image_read != RTT::NoData && new_image && current_image_->getStatus() == base::samples::frame::STATUS_VALID)
     {
-      case base::samples::frame::MODE_RGB:
-      case base::samples::frame::MODE_GRAYSCALE:
-      {
-        mat = frame_helper::FrameHelper::convertToCvMat(*current_image_);
-        break;
-      }
-      case base::samples::frame::MODE_BAYER_RGGB:
-      case base::samples::frame::MODE_BAYER_GRBG:
-      case base::samples::frame::MODE_BAYER_BGGR:
-      case base::samples::frame::MODE_BAYER_GBRG:
-      {
-        frame_helper::FrameHelper::convertBayerToRGB24(*current_image_, debayered_image);
-        mat = frame_helper::FrameHelper::convertToCvMat(debayered_image);
-//        std::runtime_error("CamerastreamTask: frame mode is not supported");
-        break;
-      }
-      default:
-      {
-        std::runtime_error("CamerastreamTask: frame mode is not supported");
-        break;
-      }
+        switch(current_image_->getFrameMode())
+        {
+            case base::samples::frame::MODE_RGB:
+            case base::samples::frame::MODE_GRAYSCALE:
+            {
+                mat = frame_helper::FrameHelper::convertToCvMat(*current_image_);
+                break;
+            }
+            case base::samples::frame::MODE_BAYER_RGGB:
+            case base::samples::frame::MODE_BAYER_GRBG:
+            case base::samples::frame::MODE_BAYER_BGGR:
+            case base::samples::frame::MODE_BAYER_GBRG:
+            {
+                frame_helper::FrameHelper::convertBayerToRGB24(*current_image_, debayered_image);
+                mat = frame_helper::FrameHelper::convertToCvMat(debayered_image);
+                std::runtime_error("CamerastreamTask: frame mode is not supported");
+                break;
+            }
+            default:
+            {
+                std::runtime_error("CamerastreamTask: frame mode is not supported");
+                break;
+            }
+        }
+        // switch bgr to rgb
+        cv::cvtColor(mat, mat, CV_BGR2RGB);
+        
+        // output stream
+        streamer->write(mat);
     }
-
-    // switch bgr to rgb
-    cv::cvtColor(mat, mat, CV_BGR2RGB);
-
-    // output stream
-    streamer->write(mat);
-  }
-
 }
+
 void Task::errorHook()
 {
     TaskBase::errorHook();
@@ -97,4 +93,6 @@ void Task::stopHook()
 void Task::cleanupHook()
 {
     TaskBase::cleanupHook();
+    delete streamer;
+    streamer = 0;
 }
