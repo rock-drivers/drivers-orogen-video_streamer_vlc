@@ -25,15 +25,23 @@ namespace video_streamer_vlc {
      \endverbatim
      *  It can be dynamically adapted when the deployment is called with a prefix argument. 
      */
+
+    struct PortHelper{
+        RTT::InputPort< ::RTT::extras::ReadOnlyPointer< ::base::samples::frame::Frame > > *port;
+        VlcStream *streamer;
+        PortConfig config;
+    };
+
     class Task : public TaskBase
     {
 	friend class TaskBase;
     protected:
         RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
         base::samples::frame::Frame debayered_image;
-        VlcStream *streamer;
 
+        virtual bool createInput(::video_streamer_vlc::PortConfig const & config);
 
+        std::vector<PortHelper> my_ports;
     public:
         /** TaskContext constructor for Task
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
