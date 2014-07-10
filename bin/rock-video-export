@@ -4,13 +4,18 @@
 require "orocos"
 require "vizkit"
 
+def sout_string(frame_fps = "fps", dst = "videofile")
+    "#duplicate{dst=display, dst={transcode{vcodec=mp4v,vb=2048,fps=#{frame_fps}}:std{access=file, mux=avi, dst=#{dst}}}}" 
+end
 
 def put_help
     STDERR.puts ""
-    STDERR.puts "Call rock-create-video <logfile> <videofile> [portname]"
+    STDERR.puts "Call rock-create-video <logfile> <videofile> [portname] [encoder-string]"
     STDERR.puts ""
     STDERR.puts "where Portname can be a regular expression to match a port inside"
     STDERR.puts "of the given logfile"
+    STDERR.puts "The encoder string is a vlc command-line sout string which is defaul"
+    STDERR.puts sout_string 
     exit -1 
 end
 
@@ -82,13 +87,12 @@ Orocos.run "video_streamer_vlc::Task" => "video-exporter" do
     config.config.frame_height = frame_height
     config.config.fps = frame_fps
     config.port_name = "frame"
-    #config.config.raw_config = "#transcode{vcodec=h264,vb=2048,fps=#{frame_fps}}:std{access=file, mux=mp4, dst=#{ARGV[1]}}" 
-    config.config.raw_config = "#transcode{vcodec=mp2v,vb=500,fps=#{frame_fps}}:std{access=file, mux=mpeg, dst=#{ARGV[1]}}" 
+    config.config.raw_config = sout_string(frame_fps,ARGV[1])
+    config.config.raw_config = ARGV[3] if ARGV[3]
     task.createInput(config)
     
     STDOUT.puts "Creting Video stream with: #{config.config.frame_width}x#{config.config.frame_height}@#{config.config.fps}fps"
-
-    STDOUT.puts "Using config #{config.config.raw_config}"
+    STDOUT.puts "Using overridden config #{config.config.raw_config}" if ARGV[3]
 
     source_port[0].connect_to task.frame
 
@@ -96,9 +100,9 @@ Orocos.run "video_streamer_vlc::Task" => "video-exporter" do
     task.start
 
     #Does not working only shows black image 
-    view = Vizkit.default_loader.ImageView
-    view.show
-    source_port[0].connect_to view
+    #view = Vizkit.default_loader.ImageView
+    #view.show
+    #source_port[0].connect_to view
 
     log.run(true,1) do
         STDOUT.write "\rProcessing #{log.sample_index}/#{log.size}               "
