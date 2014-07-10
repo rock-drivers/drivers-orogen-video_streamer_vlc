@@ -1,0 +1,109 @@
+#!/usr/bin/env ruby
+#
+
+require "orocos"
+require "vizkit"
+
+
+def put_help
+    STDERR.puts ""
+    STDERR.puts "Call rock-create-video <logfile> <videofile> [portname]"
+    STDERR.puts ""
+    STDERR.puts "where Portname can be a regular expression to match a port inside"
+    STDERR.puts "of the given logfile"
+    exit -1 
+end
+
+begin 
+    if !File.exist?(ARGV[0])
+        put_help
+    end
+
+    if File.exist?(ARGV[1])
+        STDERR.puts "Target movie #{ARGV[1]} exists"
+        exit -1
+    end
+rescue Exception => e
+    put_help
+end
+
+Orocos.run "video_streamer_vlc::Task" => "video-exporter" do 
+    FRAME_TYPE = Orocos.registry.get("/base/samples/frame/Frame")
+    log = Orocos::Log::Replay.open ARGV[0]
+    task = Orocos::TaskContext.get "video-exporter"
+    
+    source_port = log.find_all_ports(FRAME_TYPE, ARGV[2])
+    if source_port.size != 1
+        STDERR.puts "Could not find port, availible ports are:"
+        source_port.each do |port|
+            STDERR.puts port.name
+        end
+        put_help
+    end
+
+    frame_width = nil
+    frame_height = nil
+    frame_fps = nil
+   
+    reader = source_port[0].reader 
+    log.align
+    cnt = 0
+    times = Array.new
+    last_time = nil
+    while !frame_width && !log.eof?
+        log.step do
+            if sample = reader.read 
+                cnt = cnt + 1
+                if last_time
+                    times << 1/(sample.time - last_time)
+                end
+                last_time = sample.time
+                #Random number to get a good value for FPS
+                if cnt == 200
+                    frame_width = sample.size.width
+                    frame_height = sample.size.height
+                    avg = 0
+                    times.each do |t|
+                        avg = avg + t
+                    end
+                    avg = avg/times.size
+                    frame_fps = avg
+                end
+            end
+        end
+    end
+
+    raise if log.eof?
+    log.rewind
+
+
+    config = Types::VideoStreamerVlc::PortConfig.new
+    config.config.frame_width = frame_width
+    config.config.frame_height = frame_height
+    config.config.fps = frame_fps
+    config.port_name = "frame"
+    #config.config.raw_config = "#transcode{vcodec=h264,vb=2048,fps=#{frame_fps}}:std{access=file, mux=mp4, dst=#{ARGV[1]}}" 
+    config.config.raw_config = "#transcode{vcodec=mp2v,vb=500,fps=#{frame_fps}}:std{access=file, mux=mpeg, dst=#{ARGV[1]}}" 
+    task.createInput(config)
+    
+    STDOUT.puts "Creting Video stream with: #{config.config.frame_width}x#{config.config.frame_height}@#{config.config.fps}fps"
+
+    STDOUT.puts "Using config #{config.config.raw_config}"
+
+    source_port[0].connect_to task.frame
+
+    task.configure 
+    task.start
+
+    #Does not working only shows black image 
+    view = Vizkit.default_loader.ImageView
+    view.show
+    source_port[0].connect_to view
+
+    log.run(true,1) do
+        STDOUT.write "\rProcessing #{log.sample_index}/#{log.size}               "
+        Vizkit.process_events
+    end
+    STDOUT.puts "Encoding finished"
+end
+
