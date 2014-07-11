@@ -1,25 +1,25 @@
-/* Generated from orogen/lib/orogen/templates/tasks/Task.cpp */
+/* Generated from orogen/lib/orogen/templates/tasks/Streamer.cpp */
 
-#include "Task.hpp"
+#include "Streamer.hpp"
 
 using namespace video_streamer_vlc;
 
-Task::Task(std::string const& name)
-    : TaskBase(name)
+Streamer::Streamer(std::string const& name)
+    : StreamerBase(name)
 {
 }
 
-Task::Task(std::string const& name, RTT::ExecutionEngine* engine)
-    : TaskBase(name, engine)
+Streamer::Streamer(std::string const& name, RTT::ExecutionEngine* engine)
+    : StreamerBase(name, engine)
 {
 }
 
-Task::~Task()
+Streamer::~Streamer()
 {
 }
 
 
-bool Task::createInput(::video_streamer_vlc::PortConfig const & config)
+bool Streamer::createInput(::video_streamer_vlc::PortConfig const & config)
 {
     PortHelper ph;
     ph.config = config;
@@ -38,24 +38,24 @@ bool Task::createInput(::video_streamer_vlc::PortConfig const & config)
 
 
 /// The following lines are template definitions for the various state machine
-// hooks defined by Orocos::RTT. See Task.hpp for more detailed
+// hooks defined by Orocos::RTT. See Streamer.hpp for more detailed
 // documentation about them.
 
-bool Task::configureHook()
+bool Streamer::configureHook()
 {
-    if (! TaskBase::configureHook())
+    if (! StreamerBase::configureHook())
         return false;
     return true;
 }
-bool Task::startHook()
+bool Streamer::startHook()
 {
-    if (! TaskBase::startHook())
+    if (! StreamerBase::startHook())
         return false;
     return true;
 }
-void Task::updateHook()
+void Streamer::updateHook()
 {
-    TaskBase::updateHook();
+    StreamerBase::updateHook();
     cv::Mat mat;
 
     for(std::vector<PortHelper>::iterator it = my_ports.begin(); it != my_ports.end();it++)
@@ -84,12 +84,12 @@ void Task::updateHook()
                     {
                         frame_helper::FrameHelper::convertBayerToRGB24(*current_image_, debayered_image);
                         mat = frame_helper::FrameHelper::convertToCvMat(debayered_image);
-                        std::runtime_error("CamerastreamTask: frame mode is not supported");
+                        std::runtime_error("CamerastreamStreamer: frame mode is not supported");
                         break;
                     }
                     default:
                     {
-                        std::runtime_error("CamerastreamTask: frame mode is not supported");
+                        std::runtime_error("CamerastreamStreamer: frame mode is not supported");
                         break;
                     }
                 }
@@ -103,17 +103,17 @@ void Task::updateHook()
     }
 }
 
-void Task::errorHook()
+void Streamer::errorHook()
 {
-    TaskBase::errorHook();
+    StreamerBase::errorHook();
 }
-void Task::stopHook()
+void Streamer::stopHook()
 {
-    TaskBase::stopHook();
+    StreamerBase::stopHook();
 }
-void Task::cleanupHook()
+void Streamer::cleanupHook()
 {
-    TaskBase::cleanupHook();
+    StreamerBase::cleanupHook();
     for(std::vector<PortHelper>::iterator it = my_ports.begin(); it != my_ports.end();it++)
     {
         ports()->removePort(it->port->getName());

@@ -1,9 +1,9 @@
-/* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
+/* Generated from orogen/lib/orogen/templates/tasks/Streamer.hpp */
 
-#ifndef VIDEO_STREAMER_VLC_TASK_TASK_HPP
-#define VIDEO_STREAMER_VLC_TASK_TASK_HPP
+#ifndef VIDEO_STREAMER_VLC_STREAMER_TASK_HPP
+#define VIDEO_STREAMER_VLC_STREAMER_TASK_HPP
 
-#include "video_streamer_vlc/TaskBase.hpp"
+#include "video_streamer_vlc/StreamerBase.hpp"
 #include "opencv2/opencv.hpp"
 #include "frame_helper/FrameHelper.h"
 #include "video_streamer_vlc/VlcStream.hpp"
@@ -11,16 +11,16 @@
 
 namespace video_streamer_vlc {
 
-    /*! \class Task 
+    /*! \class Streamer 
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
      * Essential interfaces are operations, data flow ports and properties. These interfaces have been defined using the oroGen specification.
      * In order to modify the interfaces you should (re)use oroGen and rely on the associated workflow.
      * 
      * \details
-     * The name of a TaskContext is primarily defined via:
+     * The name of a StreamerContext is primarily defined via:
      \verbatim
      deployment 'deployment_name'
-         task('custom_task_name','video_streamer_vlc::Task')
+         task('custom_task_name','video_streamer_vlc::Streamer')
      end
      \endverbatim
      *  It can be dynamically adapted when the deployment is called with a prefix argument. 
@@ -32,9 +32,9 @@ namespace video_streamer_vlc {
         PortConfig config;
     };
 
-    class Task : public TaskBase
+    class Streamer : public StreamerBase
     {
-	friend class TaskBase;
+	friend class StreamerBase;
     protected:
         RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
         base::samples::frame::Frame debayered_image;
@@ -43,22 +43,22 @@ namespace video_streamer_vlc {
 
         std::vector<PortHelper> my_ports;
     public:
-        /** TaskContext constructor for Task
+        /** StreamerContext constructor for Streamer
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
-         * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
+         * \param initial_state The initial StreamerState of the StreamerContext. Default is Stopped state.
          */
-        Task(std::string const& name = "video_streamer_vlc::Task");
+        Streamer(std::string const& name = "video_streamer_vlc::Streamer");
 
-        /** TaskContext constructor for Task 
+        /** StreamerContext constructor for Streamer 
          * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 
          * \param engine The RTT Execution engine to be used for this task, which serialises the execution of all commands, programs, state machines and incoming events for a task. 
          * 
          */
-        Task(std::string const& name, RTT::ExecutionEngine* engine);
+        Streamer(std::string const& name, RTT::ExecutionEngine* engine);
 
-        /** Default deconstructor of Task
+        /** Default deconstructor of Streamer
          */
-	~Task();
+	~Streamer();
 
         /** This hook is called by Orocos when the state machine transitions
          * from PreOperational to Stopped. If it returns false, then the
@@ -68,7 +68,7 @@ namespace video_streamer_vlc {
          * It is meaningful only if the #needs_configuration has been specified
          * in the task context definition with (for example):
          \verbatim
-         task_context "TaskName" do
+         task_context "StreamerName" do
            needs_configuration
            ...
          end

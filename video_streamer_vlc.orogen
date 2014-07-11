@@ -3,10 +3,11 @@ version '0.1'
 
 using_library 'frame_helper'
 using_library 'video_streamer_vlc'
+using_library 'video_capture_vlc'
 import_types_from 'base'
 import_types_from 'VLCConfig.hpp'
 
-task_context 'Task' do
+task_context 'Streamer' do
     needs_configuration
 
     dynamic_input_port(/.*/, ro_ptr('base::samples::frame::Frame')).
@@ -23,3 +24,20 @@ task_context 'Task' do
 
 end
 
+task_context 'Capturer' do
+    needs_configuration
+
+    dynamic_output_port(/.*/, ro_ptr('base::samples::frame::Frame')).
+        doc 'camera frame'
+
+
+    operation("createStream")
+        .returns("/bool")
+        .argument("portname","/std/string")
+        .argument("uri","/std/string")
+    
+	
+    fatal_states :IO_ERROR
+    port_driven
+
+end

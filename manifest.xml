@@ -8,6 +8,7 @@
   <logo>http://</logo>
   <depend package="opencv" />
   <depend package="drivers/video_streamer_vlc" />
+  <depend package="drivers/video_capture_vlc" />
   <depend package="image_processing/frame_helper" />
   <versioncontrol type="git" url="" />
   <export>
