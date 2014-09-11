@@ -11,6 +11,8 @@ namespace video_streamer_vlc {
     struct PortHelperCapture{
         RTT::OutputPort< ::RTT::extras::ReadOnlyPointer< ::base::samples::frame::Frame > > *port;
         VlcCapture *capturer;
+        base::samples::frame::Frame frame;
+        RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> output; 
         std::string uri;
     };
 
@@ -21,8 +23,6 @@ namespace video_streamer_vlc {
 
         virtual bool createStream(::std::string const & portname, ::std::string const & uri);
         std::vector<PortHelperCapture> my_ports;
-        base::samples::frame::Frame frame;
-        RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> output; 
     public:
         /** TaskContext constructor for Capturer
          * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
