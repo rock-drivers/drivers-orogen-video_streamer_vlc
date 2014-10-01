@@ -57,6 +57,9 @@ namespace video_streamer_vlc
         std::string dst;
         
         Config(){
+	    frame_width = 640;
+	    frame_height = 480;
+            fps = 30;
             vcodec = std::string("MJPG");
             bitrate = 500;
             mux = std::string("mpjpeg");
