@@ -68,6 +68,7 @@ void Streamer::updateHook()
                 {
                     std::cout << "Warn incoming image has different size than configured" << std::endl ;
                     std::cout << "Current Size is: " << current_image_->getWidth() << "x" << current_image_->getHeight() << std::endl;
+                    std::cout << "Configured size is: " << it->config.config.frame_height << "x" << it->config.config.frame_width() << std::endl;
                 }
                 switch(current_image_->getFrameMode())
                 {
