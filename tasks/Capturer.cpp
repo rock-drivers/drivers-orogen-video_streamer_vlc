@@ -55,6 +55,7 @@ void Capturer::updateHook()
     for(unsigned int i=0;i<my_ports.size();i++){
         while(my_ports[i].capturer->read(image)){
             frame_helper::FrameHelper::copyMatToFrame(image,my_ports[i].frame);
+            my_ports[i].frame.time = base::Time::now();
             my_ports[i].output.reset(&my_ports[i].frame);
             my_ports[i].port->write(my_ports[i].output); 
         }
