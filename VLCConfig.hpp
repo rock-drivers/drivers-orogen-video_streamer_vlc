@@ -55,6 +55,11 @@ namespace video_streamer_vlc
          * Destination url for stream, default http://127.0.0.1:8080/video.mjpg
          */
         std::string dst;
+
+        /*
+         * Destination access, see vlc documentation 
+         */
+        std::string access;
         
         Config(){
 	    frame_width = 640;
@@ -64,6 +69,7 @@ namespace video_streamer_vlc
             bitrate = 500;
             mux = std::string("mpjpeg");
             dst = std::string("127.0.0.1:8080/video.mjpg");
+            access = std::string("http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a}");
         }
     };
     

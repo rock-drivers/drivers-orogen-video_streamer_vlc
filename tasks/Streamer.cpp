@@ -25,7 +25,11 @@ bool Streamer::createInput(::video_streamer_vlc::PortConfig const & config)
     ph.config = config;
     if(config.config.raw_config.empty()){
         std::stringstream s;
-        s << "#transcode{vcodec=" << config.config.vcodec << ", vb="<< config.config.bitrate << "}:std{access=http{mime=multipart/x-mixed-replace; boundary=--7b3cc56e5f51db803f790dad720ed50a},mux=" << config.config.mux << ",dst=" << config.config.dst << "}";
+        s << "#transcode{vcodec=" << config.config.vcodec 
+            << ", vb="<< config.config.bitrate 
+            << "}:std{"
+            << "access=" << config.config.access 
+            << ", mux=" << config.config.mux << ",dst=" << config.config.dst << "}";
         ph.config.config.raw_config = s.str();
     }   
     ph.streamer = new VlcStream(ph.config.config.raw_config, config.config.fps, config.config.frame_width, config.config.frame_height);
