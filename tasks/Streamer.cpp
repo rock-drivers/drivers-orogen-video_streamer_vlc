@@ -82,22 +82,25 @@ void Streamer::updateHook()
                         mat = frame_helper::FrameHelper::convertToCvMat(*current_image_);
                         break;
                     }
+                    case base::samples::frame::MODE_JPEG:
                     case base::samples::frame::MODE_BAYER_RGGB:
                     case base::samples::frame::MODE_BAYER_GRBG:
                     case base::samples::frame::MODE_BAYER_BGGR:
                     case base::samples::frame::MODE_BAYER_GBRG:
                     {
-                        frame_helper::FrameHelper::convertBayerToRGB24(*current_image_, debayered_image);
-                        mat = frame_helper::FrameHelper::convertToCvMat(debayered_image);
-                        std::runtime_error("CamerastreamStreamer: frame mode is not supported");
+                        rgb_image.init( *current_image_, false );
+                        rgb_image.setFrameMode( base::samples::frame::MODE_RGB );
+                        frame_helper.convertColor(*current_image_, rgb_image);
+                        mat = frame_helper::FrameHelper::convertToCvMat(rgb_image);
                         break;
                     }
                     default:
                     {
-                        std::runtime_error("CamerastreamStreamer: frame mode is not supported");
+                        throw std::runtime_error("CamerastreamStreamer: frame mode is not supported");
                         break;
                     }
                 }
+
                 // switch bgr to rgb
                 cv::cvtColor(mat, mat, CV_BGR2RGB);
                 

@@ -37,7 +37,8 @@ namespace video_streamer_vlc {
 	friend class StreamerBase;
     protected:
         RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
-        base::samples::frame::Frame debayered_image;
+        frame_helper::FrameHelper frame_helper;
+        base::samples::frame::Frame rgb_image;
 
         virtual bool createInput(::video_streamer_vlc::PortConfig const & config);
 
