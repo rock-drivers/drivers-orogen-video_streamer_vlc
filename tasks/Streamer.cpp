@@ -105,7 +105,7 @@ void Streamer::updateHook()
                 cv::cvtColor(mat, mat, CV_BGR2RGB);
                 
                 // output stream
-                it->streamer->write(mat);
+                it->streamer->write(mat, current_image_->time.toMicroseconds() );
             }
         }
     }
