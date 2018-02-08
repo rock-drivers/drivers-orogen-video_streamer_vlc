@@ -5,7 +5,7 @@ require "orocos"
 require "vizkit"
 
 def sout_string(frame_fps = "fps", dst = "videofile")
-    "#duplicate{dst=display, dst={transcode{vcodec=mp4v,vb=2048,fps=#{frame_fps}}:std{access=file, mux=avi, dst=#{dst}}}}" 
+    "#duplicate{dst=display, dst={transcode{vcodec=mp4v,vb=2048,fps=#{frame_fps}}:std{access=file, mux=avi, dst=#{dst}}}}"
 end
 
 def put_help
@@ -15,11 +15,63 @@ def put_help
     STDERR.puts "where Portname can be a regular expression to match a port inside"
     STDERR.puts "of the given logfile"
     STDERR.puts "The encoder string is a vlc command-line sout string which is defaul"
-    STDERR.puts sout_string 
-    exit -1 
+    STDERR.puts sout_string
+    exit -1
 end
 
-begin 
+def extract_parameters(logfile, portname)
+    require 'pocolog'
+    log = Pocolog::Logfiles.new File.open(logfile)
+
+    frame_width = nil
+    frame_height = nil
+    frame_fps = nil
+
+    streams = log.streams_from_type(FRAME_TYPE)
+    stream = nil
+    streams.each do |s|
+        if s.name =~ /.*\.#{portname}$/
+            stream = s
+            break
+        end
+    end
+    if !stream
+         raise ArgumentError, "Could not find port #{portname} as stream"
+    end
+    cnt = 0
+    times = Array.new
+    last_time = nil
+    while !frame_width && !log.eof?
+        stream.samples.each do |realtime, logical, sample|
+            cnt = cnt + 1
+            if last_time
+                times << 1/(sample.time - last_time)
+            end
+            last_time = sample.time
+            frame_width = sample.size.width
+            frame_height = sample.size.height
+
+            #Random number to get a good value for FPS
+            if cnt == 200
+                avg = 0
+                times.each do |t|
+                    avg = avg + t
+                end
+                avg = avg/times.size
+                frame_fps = avg
+            end
+        end
+    end
+
+    if !frame_width && !frame_height
+        raise ArgumentError, "Failed to extract frame width and height"
+    end
+
+    [frame_width, frame_height, frame_fps.to_i]
+end
+
+
+begin
     if !File.exist?(ARGV[0])
         put_help
     end
@@ -32,55 +84,26 @@ rescue Exception => e
     put_help
 end
 
-Orocos.run "video_streamer_vlc::Task" => "video-exporter" do 
-    FRAME_TYPE = Orocos.registry.get("/base/samples/frame/Frame")
-    log = Orocos::Log::Replay.open ARGV[0]
+Orocos.run "video_streamer_vlc::Streamer" => "video-exporter" do
     task = Orocos::TaskContext.get "video-exporter"
-    
-    source_port = log.find_all_ports(FRAME_TYPE, ARGV[2])
+
+    FRAME_TYPE = Orocos.registry.get("/base/samples/frame/Frame")
+
+    filename = ARGV[0]
+    portname = ARGV[2]
+
+    frame_width, frame_height, frame_fps = extract_parameters(filename,portname)
+    puts "Frame width:#{frame_width}, height:#{frame_height}, fps: #{frame_fps}"
+
+    log = Orocos::Log::Replay.open(filename)
+    source_port = log.find_all_ports(FRAME_TYPE, portname)
     if source_port.size != 1
-        STDERR.puts "Could not find port, availible ports are:"
+        STDERR.puts "Could not find port, available ports are:"
         source_port.each do |port|
             STDERR.puts port.name
         end
         put_help
     end
-
-    frame_width = nil
-    frame_height = nil
-    frame_fps = nil
-   
-    reader = source_port[0].reader 
-    log.align
-    cnt = 0
-    times = Array.new
-    last_time = nil
-    while !frame_width && !log.eof?
-        log.step do
-            if sample = reader.read 
-                cnt = cnt + 1
-                if last_time
-                    times << 1/(sample.time - last_time)
-                end
-                last_time = sample.time
-                #Random number to get a good value for FPS
-                if cnt == 200
-                    frame_width = sample.size.width
-                    frame_height = sample.size.height
-                    avg = 0
-                    times.each do |t|
-                        avg = avg + t
-                    end
-                    avg = avg/times.size
-                    frame_fps = avg
-                end
-            end
-        end
-    end
-
-    raise if log.eof?
-    log.rewind
-
 
     config = Types::VideoStreamerVlc::PortConfig.new
     config.config.frame_width = frame_width
@@ -90,16 +113,16 @@ Orocos.run "video_streamer_vlc::Task" => "video-exporter" do
     config.config.raw_config = sout_string(frame_fps,ARGV[1])
     config.config.raw_config = ARGV[3] if ARGV[3]
     task.createInput(config)
-    
-    STDOUT.puts "Creting Video stream with: #{config.config.frame_width}x#{config.config.frame_height}@#{config.config.fps}fps"
+
+    STDOUT.puts "Creating video stream with: #{config.config.frame_width}x#{config.config.frame_height}@#{config.config.fps}fps"
     STDOUT.puts "Using overridden config #{config.config.raw_config}" if ARGV[3]
 
     source_port[0].connect_to task.frame
 
-    task.configure 
+    task.configure
     task.start
 
-    #Does not working only shows black image 
+    #Does not working only shows black image
     #view = Vizkit.default_loader.ImageView
     #view.show
     #source_port[0].connect_to view
