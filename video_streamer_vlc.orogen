@@ -13,7 +13,6 @@ task_context 'Streamer' do
     dynamic_input_port(/.*/, ro_ptr('base::samples::frame::Frame')).
         doc 'camera frame'
 
-
     operation("createInput")
         .returns("/bool")
         .argument("config","/video_streamer_vlc/PortConfig")
@@ -22,6 +21,16 @@ task_context 'Streamer' do
     fatal_states :IO_ERROR
     port_driven
 
+end
+
+task_context 'SingleStreamer' do
+    needs_configuration
+
+    input_port('input_frames', ro_ptr('base::samples::frame::Frame'))
+
+    property 'config', "/video_streamer_vlc/Config"
+    
+    port_driven
 end
 
 task_context 'Capturer' do
