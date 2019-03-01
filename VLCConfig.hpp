@@ -17,12 +17,12 @@ namespace video_streamer_vlc
         /*
          * image width in pixel, default 640
          */
-	unsigned int frame_width;
+        unsigned int frame_width;
         
         /*
          * image height in pixel, default 480
          */
-	unsigned int frame_height;
+        unsigned int frame_height;
         
         /*
          * Frames per second, default 30

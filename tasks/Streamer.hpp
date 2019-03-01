@@ -40,26 +40,28 @@ namespace video_streamer_vlc {
         frame_helper::FrameHelper frame_helper;
         base::samples::frame::Frame rgb_image;
 
-        virtual bool createInput(::video_streamer_vlc::PortConfig const & config);
+        virtual bool createInput(::video_streamer_vlc::PortConfig const & port_config);
 
         std::vector<PortHelper> my_ports;
     public:
         /** StreamerContext constructor for Streamer
-         * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
-         * \param initial_state The initial StreamerState of the StreamerContext. Default is Stopped state.
+         * \param name Name of the task. This name needs to be unique to make it 
+         * identifiable via nameservices.
+         * \param initial_state The initial StreamerState of the StreamerContext. 
+         * Default is Stopped state.
          */
         Streamer(std::string const& name = "video_streamer_vlc::Streamer");
 
         /** StreamerContext constructor for Streamer 
-         * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices. 
-         * \param engine The RTT Execution engine to be used for this task, which serialises the execution of all commands, programs, state machines and incoming events for a task. 
-         * 
+         * \param name Name of the task. This name needs to be unique to make it 
+         * identifiable for nameservices. 
+         * \param engine The RTT Execution engine to be used for this task, which 
+         * serialises the execution of all commands, programs, state machines and incoming 
+         * events for a task. 
          */
         Streamer(std::string const& name, RTT::ExecutionEngine* engine);
 
-        /** Default deconstructor of Streamer
-         */
-	~Streamer();
+        ~Streamer();
 
         /** This hook is called by Orocos when the state machine transitions
          * from PreOperational to Stopped. If it returns false, then the
