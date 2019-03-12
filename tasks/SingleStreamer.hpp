@@ -1,67 +1,59 @@
-/* Generated from orogen/lib/orogen/templates/tasks/Streamer.hpp */
+/* Generated from orogen/lib/orogen/templates/tasks/Task.hpp */
 
-#ifndef VIDEO_STREAMER_VLC_STREAMER_TASK_HPP
-#define VIDEO_STREAMER_VLC_STREAMER_TASK_HPP
+#ifndef VIDEO_STREAMER_VLC_SINGLESTREAMER_TASK_HPP
+#define VIDEO_STREAMER_VLC_SINGLESTREAMER_TASK_HPP
 
-#include "video_streamer_vlc/StreamerBase.hpp"
+#include <memory>
+
+#include "video_streamer_vlc/SingleStreamerBase.hpp"
 #include "opencv2/opencv.hpp"
 #include "frame_helper/FrameHelper.h"
 #include "video_streamer_vlc/VlcStream.hpp"
 
+namespace video_streamer_vlc{
 
-namespace video_streamer_vlc {
-
-    /*! \class Streamer 
+    /*! \class SingleStreamer
      * \brief The task context provides and requires services. It uses an ExecutionEngine to perform its functions.
      * Essential interfaces are operations, data flow ports and properties. These interfaces have been defined using the oroGen specification.
      * In order to modify the interfaces you should (re)use oroGen and rely on the associated workflow.
      * 
      * \details
-     * The name of a StreamerContext is primarily defined via:
+     * The name of a TaskContext is primarily defined via:
      \verbatim
      deployment 'deployment_name'
-         task('custom_task_name','video_streamer_vlc::Streamer')
+         task('custom_task_name','video_streamer_vlc::SingleStreamer')
      end
      \endverbatim
-     *  It can be dynamically adapted when the deployment is called with a prefix argument. 
+     *  It can be dynamically adapted when the deployment is called with a prefix argument.
      */
-
-    struct PortHelper{
-        RTT::InputPort< ::RTT::extras::ReadOnlyPointer< ::base::samples::frame::Frame > > *port;
-        VlcStream *streamer;
-        PortConfig config;
-    };
-
-    class Streamer : public StreamerBase
+    class SingleStreamer : public SingleStreamerBase
     {
-	friend class StreamerBase;
+	friend class SingleStreamerBase;
     protected:
-        RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
-        frame_helper::FrameHelper frame_helper;
-        base::samples::frame::Frame rgb_image;
+    
+    std::unique_ptr<VlcStream> streamer;
+    RTT::extras::ReadOnlyPointer<base::samples::frame::Frame> current_image_;
+    frame_helper::FrameHelper frame_helper;
+    base::samples::frame::Frame rgb_image;
+    video_streamer_vlc::Config config;
 
-        virtual bool createInput(::video_streamer_vlc::PortConfig const & port_config);
-
-        std::vector<PortHelper> my_ports;
     public:
-        /** StreamerContext constructor for Streamer
-         * \param name Name of the task. This name needs to be unique to make it 
-         * identifiable via nameservices.
-         * \param initial_state The initial StreamerState of the StreamerContext. 
-         * Default is Stopped state.
+        /** TaskContext constructor for SingleStreamer
+         * \param name Name of the task. This name needs to be unique to make it identifiable via nameservices.
+         * \param initial_state The initial TaskState of the TaskContext. Default is Stopped state.
          */
-        Streamer(std::string const& name = "video_streamer_vlc::Streamer");
+        SingleStreamer(std::string const& name = "video_streamer_vlc::SingleStreamer");
 
-        /** StreamerContext constructor for Streamer 
-         * \param name Name of the task. This name needs to be unique to make it 
-         * identifiable for nameservices. 
-         * \param engine The RTT Execution engine to be used for this task, which 
-         * serialises the execution of all commands, programs, state machines and incoming 
-         * events for a task. 
+        /** TaskContext constructor for SingleStreamer
+         * \param name Name of the task. This name needs to be unique to make it identifiable for nameservices.
+         * \param engine The RTT Execution engine to be used for this task, which serialises the execution of all commands, programs, state machines and incoming events for a task.
+         * 
          */
-        Streamer(std::string const& name, RTT::ExecutionEngine* engine);
+        SingleStreamer(std::string const& name, RTT::ExecutionEngine* engine);
 
-        ~Streamer();
+        /** Default deconstructor of SingleStreamer
+         */
+        ~SingleStreamer();
 
         /** This hook is called by Orocos when the state machine transitions
          * from PreOperational to Stopped. If it returns false, then the
@@ -71,7 +63,7 @@ namespace video_streamer_vlc {
          * It is meaningful only if the #needs_configuration has been specified
          * in the task context definition with (for example):
          \verbatim
-         task_context "StreamerName" do
+         task_context "TaskName" do
            needs_configuration
            ...
          end
@@ -92,7 +84,7 @@ namespace video_streamer_vlc {
          *
          * The error(), exception() and fatal() calls, when called in this hook,
          * allow to get into the associated RunTimeError, Exception and
-         * FatalError states. 
+         * FatalError states.
          *
          * In the first case, updateHook() is still called, and recover() allows
          * you to go back into the Running state.  In the second case, the

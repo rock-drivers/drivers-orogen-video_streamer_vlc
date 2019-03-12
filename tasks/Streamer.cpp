@@ -18,7 +18,6 @@ Streamer::~Streamer()
 {
 }
 
-
 bool Streamer::createInput(::video_streamer_vlc::PortConfig const & config)
 {
     PortHelper ph;
@@ -32,8 +31,10 @@ bool Streamer::createInput(::video_streamer_vlc::PortConfig const & config)
             << ", mux=" << config.config.mux << ",dst=" << config.config.dst << "}";
         ph.config.config.raw_config = s.str();
     }   
-    ph.streamer = new VlcStream(ph.config.config.raw_config, config.config.fps, config.config.frame_width, config.config.frame_height);
-    ph.port = new RTT::InputPort< ::RTT::extras::ReadOnlyPointer< ::base::samples::frame::Frame > >(config.port_name); 
+    ph.streamer = new VlcStream(ph.config.config.raw_config, config.config.fps, 
+        config.config.frame_width, config.config.frame_height);
+    ph.port  = new RTT::InputPort< ::RTT::extras::ReadOnlyPointer< 
+        ::base::samples::frame::Frame > >(config.port_name); 
     ports()->addEventPort(config.port_name, *ph.port);
     ph.streamer->start();
     my_ports.push_back(ph);
@@ -68,11 +69,15 @@ void Streamer::updateHook()
         {
             if(current_image_->getStatus() == base::samples::frame::STATUS_VALID)
             {
-                if(current_image_->getWidth() != it->config.config.frame_width || current_image_->getHeight() != it->config.config.frame_height)
+                if(current_image_->getWidth() != it->config.config.frame_width || 
+                    current_image_->getHeight() != it->config.config.frame_height)
                 {
-                    std::cout << "Warn incoming image has different size than configured" << std::endl ;
-                    std::cout << "Current Size is: " << current_image_->getWidth() << "x" << current_image_->getHeight() << std::endl;
-                    std::cout << "Configured size is: " << it->config.config.frame_height << "x" << it->config.config.frame_width << std::endl;
+                    std::cout << "Warn incoming image has different size than configured" 
+                        << std::endl ;
+                    std::cout << "Current Size is: " << current_image_->getWidth() << "x" 
+                        << current_image_->getHeight() << std::endl;
+                    std::cout << "Configured size is: " << it->config.config.frame_height 
+                        << "x" << it->config.config.frame_width << std::endl;
                 }
                 switch(current_image_->getFrameMode())
                 {
