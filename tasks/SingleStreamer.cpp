@@ -37,7 +37,6 @@ bool SingleStreamer::configureHook()
             << ":http{"
             << "mux=" << config.mux << ",dst=" << config.dst << "}";
         config.raw_config = s.str();
-        std::cout << config.raw_config << std::endl;
     }   
     
     streamer = std::make_unique<VlcStream>(config.raw_config, config.fps, 
@@ -86,6 +85,7 @@ void SingleStreamer::updateHook()
                 case base::samples::frame::MODE_BAYER_GRBG:
                 case base::samples::frame::MODE_BAYER_BGGR:
                 case base::samples::frame::MODE_BAYER_GBRG:
+                case base::samples::frame::MODE_BGR:
                 {
                     rgb_image.init( *current_image_, false );
                     rgb_image.setFrameMode( base::samples::frame::MODE_RGB );
@@ -100,8 +100,6 @@ void SingleStreamer::updateHook()
                 }
             }
 
-            // switch bgr to rgb
-            cv::cvtColor(mat, mat, CV_BGR2RGB);
             // output stream
             streamer->write(mat, current_image_->time.toMicroseconds() );
         }
