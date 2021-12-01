@@ -107,7 +107,11 @@ void Streamer::updateHook()
                 }
 
                 // switch bgr to rgb
-                cv::cvtColor(mat, mat, CV_BGR2RGB);
+                #if (CV_VERSION_MAJOR >= 4)
+                    cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
+                #else
+                    cv::cvtColor(mat, mat, CV_BGR2RGB);
+                #endif
                 
                 // output stream
                 it->streamer->write(mat, current_image_->time.toMicroseconds() );
